@@ -35,155 +35,155 @@ import Otp from '../components/Otp';
 import ForgetPassword from '../components/forgetpassword/ForgetPassword';
 import TermsConditions from '../pages/termsconditon/TermsConditions';
 import ProductSearch from '../components/search/ProductSearch';
-import Deals from '../pages/dashboard/admin/deals/deals';
+import Deals from '../pages/dashboard/admin/beastdeals/Deals';
 
 
 const router = createBrowserRouter([
     {
         path: '/',
-        element: <App/>,
-        errorElement: <ErrorPage/>,
-        children:[
+        element: <App />,
+        errorElement: <ErrorPage />,
+        children: [
             {
                 path: '/',
-                element: <HomePage/>
+                element: <HomePage />
             },
             {
                 path: '/shop',
-                element: <ShopPage/>
+                element: <ShopPage />
             },
             {
                 path: '/shop/:id',
-                element: <SingleProduct/>
+                element: <SingleProduct />
             },
             {
                 path: '/categories/:categoryName',
-                element: <CategoryPage/>
+                element: <CategoryPage />
             },
             {
                 path: "/payment/success/:tranId",
-                element: <PaymentSuccess/>
+                element: <PaymentSuccess />
             },
             {
                 path: "/payment/fail/:tranId",
-                element: <PaymentFail/>
+                element: <PaymentFail />
             },
             {
                 path: '/orders/:orderId',
-                element: <OrderDetails/>
+                element: <OrderDetails />
             },
             {
-            path: '/cart',
-            element: <CartModal/>
+                path: '/cart',
+                element: <CartModal />
             },
             {
                 path: '/checkout',
-                element: <Checkout/>
+                element: <Checkout />
             },
             {
                 path: '/wishlist',
-                element: <Wishlist/>
+                element: <Wishlist />
             },
             {
                 path: '/about-us',
-                element: <AboutUs/>
+                element: <AboutUs />
             },
             {
                 path: '/contact-us',
-                element: <ContactUs/>
+                element: <ContactUs />
             },
             {
                 path: '/faq',
-                element: <FAQ/>
+                element: <FAQ />
             },
             {
                 path: '/whoweare',
-                element: <WhoWeAre/>
+                element: <WhoWeAre />
             },
             {
                 path: '/terms-conditions',
-                element: <TermsConditions/>
+                element: <TermsConditions />
             },
             {
                 path: '/search',
-                element: <ProductSearch/>
+                element: <ProductSearch />
             }
         ]
     },
     {
         path: '/login',
-        element: <LoginPage/>
+        element: <LoginPage />
     },
     {
         path: '/register',
-        element: <Register/>
+        element: <Register />
     },
     {
         path: '/verify-otp',
-        element: <Otp/>
+        element: <Otp />
     },
     {
         path: '/forget-password',
-        element: <ForgetPassword/>
+        element: <ForgetPassword />
     },
     {
         path: '/dashboard',
-        element: <PrivateRoute><DashboardLayout/></PrivateRoute>,
+        element: <PrivateRoute><DashboardLayout /></PrivateRoute>,
         children: [
             // user routes
             {
                 path: '',
-                element: <UserDmain/>
+                element: <UserDmain />
             },
             {
                 path: 'orders',
-                element: <UserOrders/>
+                element: <UserOrders />
             },
             {
                 path: 'payments',
-                element: <UserPayments/>
+                element: <UserPayments />
             },
             {
                 path: 'profile',
-                element: <UserProfile/>
+                element: <UserProfile />
             },
             {
                 path: 'reviews',
-                element: <UserReviews/>
+                element: <UserReviews />
             },
 
             // admin routes
             {
                 path: 'admin',
-                element: <PrivateRoute role="admin"><AdminDMain/></PrivateRoute>
+                element: <PrivateRoute role="admin"><AdminDMain /></PrivateRoute>
             },
             {
                 path: 'add-product',
-                element: <PrivateRoute role="admin"><AddProduct/></PrivateRoute>
+                element: <PrivateRoute role="admin"><AddProduct /></PrivateRoute>
             },
             {
                 path: 'manage-products',
-                element: <PrivateRoute role="admin"><ManageProducts/></PrivateRoute>
+                element: <PrivateRoute role="admin"><ManageProducts /></PrivateRoute>
             },
             {
                 path: 'update-product/:id',
-                element: <PrivateRoute role="admin"><UpdateProduct/></PrivateRoute>
+                element: <PrivateRoute role="admin"><UpdateProduct /></PrivateRoute>
             },
             {
                 path: 'manage-orders',
-                element: <PrivateRoute role="admin"><ManageOrders/></PrivateRoute>
+                element: <PrivateRoute role="admin"><ManageOrders /></PrivateRoute>
             },
             {
                 path: 'users',
-                element: <PrivateRoute role="admin"><ManageUsers/></PrivateRoute>
+                element: <PrivateRoute role="admin"><ManageUsers /></PrivateRoute>
             },
             {
                 path: 'coupon',
-                element: <PrivateRoute role="admin"><Coupon/></PrivateRoute>
+                element: <PrivateRoute role="admin"><Coupon /></PrivateRoute>
             },
             {
                 path: 'deals',
-                element: <PrivateRoute role="admin"><Deals/></PrivateRoute>
+                element: <PrivateRoute role="admin"><Deals /></PrivateRoute>
             }
         ]
     }
