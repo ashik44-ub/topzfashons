@@ -1,0 +1,15 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@layer components {
+  .premium-input {
+    @apply w-full px-4 py-3 bg-gray-50/50 border border-gray-200 rounded-xl 
+           text-gray-700 placeholder:text-gray-400 outline-none
+           transition-all duration-200 ease-in-out
+           focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10;
+  }
+  
+  .premium-label {
+    @apply block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2 ml-1;
+  }
+}
