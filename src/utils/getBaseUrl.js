@@ -1,3 +1,3 @@
  export const getBaseUrl = () => {
-    return 'https://topzfashions-backend.vercel.app';
+    return 'http://localhost:5000';
 }

@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react'; // useEffect যোগ করা হয়েছে
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 import { useLoginUserMutation } from '../redux/features/auth/authApi';
 import { useDispatch } from 'react-redux';
 import { setUser } from '../redux/features/auth/authSlice';
 import { BeatLoader } from 'react-spinners';
-import toast from 'react-hot-toast'; // টোস্ট ইম্পোর্ট করা হয়েছে
+import toast from 'react-hot-toast';
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -13,15 +13,13 @@ const LoginPage = () => {
   const [message, setMessage] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
 
-  // setValue অ্যাড করা হয়েছে যাতে ডাটা অটো-ফিল করা যায়
   const { register, handleSubmit, setValue, formState: { errors } } = useForm();
   const [loginUser, { isLoading }] = useLoginUserMutation();
 
-  // ১. পেজ লোড হওয়ার সময় আগের ইমেইল চেক করা
   useEffect(() => {
     const savedEmail = localStorage.getItem("rememberedEmail");
     if (savedEmail) {
-      setValue("email", savedEmail); // React Hook Form এ ইমেইল সেট করা
+      setValue("email", savedEmail);
       setRememberMe(true);
     }
   }, [setValue]);
@@ -30,21 +28,33 @@ const LoginPage = () => {
     try {
       setMessage(''); 
       const response = await loginUser(data).unwrap();
-      const { user } = response;
+      
+      // *** আপডেট: response থেকে user এবং token আলাদা করা ***
+      // আপনার ব্যাকএন্ড যদি { user, token } পাঠায় তবে এটি কাজ করবে
+      const { user, token } = response;
 
-      // ২. Remember Me চেক করে ডাটা সেভ বা রিমুভ করা
+      // ১. টোকেনটি LocalStorage-এ সেভ করা (যাতে authApi এটি ব্যবহার করতে পারে)
+      if (token) {
+        localStorage.setItem('token', token);
+      }
+
+      // ২. Remember Me লজিক
       if (rememberMe) {
         localStorage.setItem("rememberedEmail", data.email);
       } else {
         localStorage.removeItem("rememberedEmail");
       }
       
+      // ৩. রেডক্স স্টেট আপডেট
       dispatch(setUser({ user }));
+      
       toast.success("Login successful!");
       navigate('/');
     } catch (error) {
-      setMessage(error.data?.message || "Invalid email or password.");
-      toast.error(error.data?.message || "Login failed!");
+      console.error("Login Error:", error);
+      const errorMsg = error.data?.message || "Invalid email or password.";
+      setMessage(errorMsg);
+      toast.error(errorMsg);
     }
   };
 
@@ -70,7 +80,6 @@ const LoginPage = () => {
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
           <div className="space-y-4">
-            {/* Email Field */}
             <div>
               <label className="text-xs font-bold uppercase tracking-widest text-gray-700 ml-1">
                 Email Address
@@ -89,7 +98,6 @@ const LoginPage = () => {
               </div>
             </div>
 
-            {/* Password Field */}
             <div>
               <label className="text-xs font-bold uppercase tracking-widest text-gray-700 ml-1">
                 Password
