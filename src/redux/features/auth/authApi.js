@@ -8,7 +8,7 @@ const authApi = createApi({
         baseUrl: `${getBaseUrl()}/api/auth`,
         prepareHeaders: (headers) => {
             // ১. যদি আপনি টোকেন LocalStorage-এ সেভ করে থাকেন, তবে সেটি এখান থেকে নিয়ে হেডারে সেট করুন
-            const token = localStorage.getItem('token');
+            const token = localStorage.getItem('token'); 
             if (token) {
                 headers.set('authorization', `Bearer ${token}`);
             }
@@ -22,13 +22,6 @@ const authApi = createApi({
                 url: "/register",
                 method: 'POST',
                 body: newUser
-            })
-        }),
-        loginUser: build.mutation({
-            query: (credentials) => ({
-                url: "/login",
-                method: 'POST',
-                body: credentials
             })
         }),
         verifyOTP: build.mutation({
@@ -58,6 +51,13 @@ const authApi = createApi({
                 method: "POST",
                 body: data,
             }),
+        }),
+        loginUser: build.mutation({
+            query: (credentials) => ({
+                url: "/login",
+                method: 'POST',
+                body: credentials
+            })
         }),
         logoutUser: build.mutation({
             query: () => ({
