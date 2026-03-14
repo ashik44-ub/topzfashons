@@ -88,7 +88,7 @@ const Banner = () => {
                 >
                   <div className="relative z-10">
                     <h4 className="text-xl font-bold text-gray-900 mb-1">25% Discount</h4>
-                    <Link to={'/shop'}  className="inline-block text-xs font-bold uppercase tracking-widest border-b-2 border-red-500 pb-1 hover:text-red-500 transition-all">
+                    <Link to={'/categories/kurti'}  className="inline-block text-xs font-bold uppercase tracking-widest border-b-2 border-red-500 pb-1 hover:text-red-500 transition-all">
                       Shop now
                     </Link>
                   </div>

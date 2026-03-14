@@ -10,13 +10,15 @@ const categories = [
     { label: "Sweaters", value: "sweaters" },
     { label: "Casual Shirt", value: "casual shirt" },
     { label: "Formal Shirt", value: "formal shirt" },
+    { label: "Kurti", value: "kurti" },
 ];
 
 const colors = [
     { label: 'Black', value: 'black' }, { label: 'Red', value: 'red' },
     { label: 'Gold', value: 'gold' }, { label: 'Blue', value: 'blue' },
     { label: 'Silver', value: 'silver' }, { label: 'Beige', value: 'beige' },
-    { label: 'Green', value: 'green' }, { label: 'White', value: 'white' }
+    { label: 'Green', value: 'green' }, { label: 'White', value: 'white' },
+    { label: 'Orange', value: 'orange' }
 ];
 
 const sizes = [

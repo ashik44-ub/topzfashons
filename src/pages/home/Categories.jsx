@@ -6,8 +6,9 @@ const Categories = () => {
         { id: 1, name: 'Women’s fashion', path: 'woman' },
         { id: 2, name: 'Men’s fashion', path: 'man' },
         { id: 3, name: 'Panjabi', path: 'panjabi' },
-        { id: 4, name: 'Sweaters', path: 'sweaters' }, // কমা (,) মিসিং ছিল
-        { id: 5, name: 'Shirts', path: 'shirts' } // id ডুপ্লিকেট ছিল, ৫ করে দিয়েছি
+        { id: 4, name: 'Sweaters', path: 'sweaters' }, 
+        { id: 5, name: 'Shirts', path: 'shirts' }, 
+        { id: 6, name: 'Kurti', path: 'kurti' } 
     ]
 
     return (
