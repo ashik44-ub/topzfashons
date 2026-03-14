@@ -126,8 +126,8 @@ const SingleProduct = () => {
                                 disabled={product.quantity <= 0 && product.stock !== "In Stock"}
                                 onClick={handleAddToCart}
                                 className={`px-6 py-2 rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-2 ${product.quantity > 0 || product.stock === "In Stock"
-                                        ? "bg-black text-white hover:bg-gray-800"
-                                        : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                                    ? "bg-black text-white hover:bg-gray-800"
+                                    : "bg-gray-200 text-gray-400 cursor-not-allowed"
                                     }`}
                             >
                                 {/* এখানে আইকন এবং টেক্সট রাখা হয়েছে, আপনি চাইলে শুধু আইকনও রাখতে পারেন */}
@@ -207,7 +207,8 @@ const SingleProduct = () => {
                     {activeTab === 'description' && (
                         <div className="animate-fadeIn text-gray-600 leading-relaxed text-justify">
                             <h3 className="text-xl font-bold text-gray-800 mb-4">Product Information</h3>
-                            <p>{product?.description}</p>
+                            {/* whitespace-pre-line ক্লাসটি যোগ করা হয়েছে */}
+                            <p className="whitespace-pre-line">{product?.description}</p>
                         </div>
                     )}
 
