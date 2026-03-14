@@ -29,7 +29,7 @@ if (isLoading) {
     if (error) return <div className='text-center py-10 text-red-500'>Error loading products.</div>;
 
     const products = productData?.data?.products || [];
-    const categories = ["All", "Casual Shirt", "Formal Shirt", "Sweaters", "Panjabi"];
+    const categories = ["All", "Casual Shirt", "Formal Shirt", "Sweaters", "Panjabi", "Kurti"];
 
     const filteredProducts = activeCategory === 'All' 
         ? products 
