@@ -7,8 +7,8 @@ import { Link } from 'react-router-dom';
 
 //5
 const filters = {
-  categories: ["all", "panjabi", "sweaters", "casual shirt", "formal shirt"],
-  colors: ["all", "black", "red", "gold", "blue", "silver", "beige", "green"],
+  categories: ["all", "panjabi", "sweaters", "casual shirt", "formal shirt", "kurti"],
+  colors: ["all", "black", "red", "gold", "blue", "silver", "beige", "green", "orange"],
   priceRanges: [
     { label: "Under Tk. 200", min: 0, max: 200 },
     { label: "Tk. 200 - Tk. 400", min: 200, max: 400 },
