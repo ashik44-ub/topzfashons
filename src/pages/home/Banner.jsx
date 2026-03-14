@@ -43,6 +43,7 @@ const Banner = () => {
                 >
                   <div className="relative z-10">
                     <h4 className="text-xl font-bold text-black mb-1">Men’s fashion</h4>
+                    <p className="text-gray-800 mb-6 leading-relaxed">Redefine your style with our premium Men’s collection. Experience the perfect blend of modern trends, timeless tradition, and unmatched comfort.</p>
                     <Link to={'/categories/man'} className="inline-block text-black text-xs font-bold uppercase tracking-widest border-b-2 border-red-500 pb-1 hover:text-red-500 transition-all">
                       Shop now
                     </Link>
@@ -58,6 +59,7 @@ const Banner = () => {
                 >
                   <div className="relative z-10">
                     <h4 className="text-xl font-bold text-black mb-1">Panjabi</h4>
+                    <p className="text-gray-800 mb-6 leading-relaxed">Celebrate tradition with our premium Panjabis. A perfect blend of exquisite fabrics and modern cuts for your ultimate festive look.</p>
                     <Link to={'/categories/panjabi'} className="inline-block text-black text-xs font-bold uppercase tracking-widest border-b-2 border-red-500 pb-1 hover:text-red-500 transition-all">
                       Shop now
                     </Link>
@@ -73,6 +75,7 @@ const Banner = () => {
                 >
                   <div className="relative z-10">
                     <h4 className="text-xl font-bold text-gray-900 mb-1">Sweaters</h4>
+                    <p className="text-gray-800 mb-6 leading-relaxed">Stay warm in style! Our premium sweaters offer the perfect blend of cozy comfort, modern designs, and timeless winter elegance.</p>
                     <Link to={'/categories/sweaters'}  className="inline-block text-black text-xs font-bold uppercase tracking-widest border-b-2 border-red-500 pb-1 hover:text-red-500 transition-all">
                       Shop now
                     </Link>
@@ -87,7 +90,8 @@ const Banner = () => {
                   style={{ backgroundImage: `url(${bannerImg5})` }}
                 >
                   <div className="relative z-10">
-                    <h4 className="text-xl font-bold text-gray-900 mb-1">25% Discount</h4>
+                    <h4 className="text-xl font-bold text-gray-900 mb-1">Kurtis Dress</h4>
+                    <p className="text-gray-800 mb-6 leading-relaxed">Discover the perfect blend of tradition and modern style! Our Kurtis are crafted from premium fabrics, featuring intricate embroidery and vibrant prints. Whether it’s a casual day out or a festive celebration, stay comfortable and chic all day long.</p>
                     <Link to={'/categories/kurti'}  className="inline-block text-xs font-bold uppercase tracking-widest border-b-2 border-red-500 pb-1 hover:text-red-500 transition-all">
                       Shop now
                     </Link>
