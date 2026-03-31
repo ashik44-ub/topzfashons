@@ -101,7 +101,7 @@ const AddProduct = () => {
             oldprice: Number(product.oldprice || 0),
             quantity: Number(product.quantity || 1)
         };
-
+console.log("Payload to Backend:", finalProductData);
         try {
             await addProduct(finalProductData).unwrap();
             toast.success("Product Added Successfully!");
