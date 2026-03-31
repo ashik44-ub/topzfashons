@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { getBaseUrl } from '../../../utils/getBaseUrl';
 import { updateQuantity } from '../../../redux/features/cart/CartSlice';
 import toast from 'react-hot-toast';
+import { motion, AnimatePresence } from 'framer-motion'; // Framer motion import
 
 const Checkout = () => {
     const navigate = useNavigate();
@@ -26,14 +27,11 @@ const Checkout = () => {
         email: user?.email || '',
     });
 
-    // ১. পেজ লোড হওয়ার সময় লোকাল স্টোরেজ থেকে ডাটা রিট্রিভ করা
     useEffect(() => {
         const savedData = localStorage.getItem('checkoutFormData');
         if (savedData) {
             const parsedData = JSON.parse(savedData);
             setFormData(parsedData);
-
-            // ডিস্ট্রিক্ট অনুযায়ী ডেলিভারি চার্জ পুনরায় সেট করা
             if (parsedData.district === 'Dhaka') {
                 setDeliveryCharge(70);
             } else if (parsedData.district !== '') {
@@ -46,23 +44,22 @@ const Checkout = () => {
         const { name, value } = e.target;
         const updatedFormData = { ...formData, [name]: value };
         setFormData(updatedFormData);
-
-        // ২. ডাটা টাইপ করার সাথে সাথে লোকাল স্টোরেজে সেভ করা
         localStorage.setItem('checkoutFormData', JSON.stringify(updatedFormData));
 
         if (name === 'district') {
-            if (value === 'Dhaka') {
-                setDeliveryCharge(70);
-            } else if (value === '') {
-                setDeliveryCharge(0);
-            } else {
-                setDeliveryCharge(120);
-            }
+            if (value === 'Dhaka') setDeliveryCharge(70);
+            else if (value === '') setDeliveryCharge(0);
+            else setDeliveryCharge(120);
         }
 
         if (errors[name]) {
             setErrors({ ...errors, [name]: '' });
         }
+    };
+
+    // ফিক্সড: আইডি এবং সাইজ দুইটাই পাঠাতে হবে
+    const handleUpdateQuantity = (type, id, size) => {
+        dispatch(updateQuantity({ type, id, size }));
     };
 
     const handleApplyCoupon = async () => {
@@ -78,101 +75,67 @@ const Checkout = () => {
                 const start = new Date(coupon.startDate);
                 const expiry = new Date(coupon.expiryDate);
 
-                // ১. শুরুর তারিখ চেক (Start Date Check)
                 if (currentDate < start) {
                     setDiscount(0);
-                    return toast.error(`This coupon will be Open from ${start.toLocaleDateString('en-GB')}`);
+                    return toast.error(`Coupon opens from ${start.toLocaleDateString('en-GB')}`);
                 }
-
-                // ২. মেয়াদের তারিখ চেক (Expiry Date Check)
                 if (currentDate > expiry) {
                     setDiscount(0);
-                    return toast.error("This coupon has expired!");
+                    return toast.error("Coupon expired!");
                 }
-
-                // ৩. একটিভ স্ট্যাটাস চেক
                 if (!coupon.isActive) {
                     setDiscount(0);
-                    return toast.error("This coupon is currently inactive!");
+                    return toast.error("Coupon inactive!");
                 }
-
-                // ৪. মিনিমাম অর্ডার চেক
                 if (totalPrice < coupon.minAmount) {
                     setDiscount(0);
                     return toast.error(`Minimum order Tk. ${coupon.minAmount} required!`);
                 }
 
-                // ৫. ডিসকাউন্ট ক্যালকুলেশন
-                let calculatedDiscount = 0;
-                if (coupon.discountType === "percentage") {
-                    calculatedDiscount = (totalPrice * coupon.discountValue) / 100;
-                } else {
-                    calculatedDiscount = coupon.discountValue;
-                }
+                let calculatedDiscount = coupon.discountType === "percentage" 
+                    ? (totalPrice * coupon.discountValue) / 100 
+                    : coupon.discountValue;
 
                 setDiscount(Number(calculatedDiscount));
                 toast.success(`Coupon Applied! Saved Tk. ${calculatedDiscount}`);
             }
         } catch (error) {
             setDiscount(0);
-            const message = error.response?.data?.message || "Invalid Coupon Code";
-            toast.error(message);
+            toast.error(error.response?.data?.message || "Invalid Coupon Code");
         }
     };
 
     const validateForm = () => {
         let newErrors = {};
-        if (!formData.firstName.trim()) newErrors.firstName = "First name is required";
-        if (!formData.address.trim()) newErrors.address = "Address is required";
-        if (!formData.district) newErrors.district = "Please select a district";
-        if (!formData.phone.trim() || !/^\d{11}$/.test(formData.phone)) {
-            newErrors.phone = "Valid 11-digit phone number is required";
-        }
-        if (!formData.email.trim()) newErrors.email = "Email is required";
-
+        if (!formData.firstName.trim()) newErrors.firstName = "Required";
+        if (!formData.address.trim()) newErrors.address = "Required";
+        if (!formData.district) newErrors.district = "Required";
+        if (!formData.phone.trim() || !/^\d{11}$/.test(formData.phone)) newErrors.phone = "Invalid Phone";
+        if (!formData.email.trim()) newErrors.email = "Required";
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
 
     const makePayment = async () => {
         if (!validateForm()) return toast.error("Please fill all required fields!");
-
-        const currentDiscount = Number(discount) || 0;
-        const currentShipping = Number(deliveryCharge) || 0;
-        const currentSubtotal = Number(totalPrice) || 0;
-        const calculatedAmount = (currentSubtotal + currentShipping) - currentDiscount;
-
         const body = {
             products: products.map(p => ({
-                productId: p._id,
-                name: p.name,
-                price: p.price,
-                quantity: p.quantity,
-                size: p.size,
-                image: p.image
+                productId: p._id, name: p.name, price: p.price, quantity: p.quantity, size: p.size, image: p.image
             })),
             userId: user?._id || null,
             username: `${formData.firstName} ${formData.lastName}`.trim(),
             email: formData.email,
-            amount: calculatedAmount,
-            discount: currentDiscount,
-            shippingInfo: {
-                ...formData,
-                deliveryCharge: currentShipping
-            },
+            amount: (totalPrice + deliveryCharge) - discount,
+            discount,
+            shippingInfo: { ...formData, deliveryCharge },
             status: "pending"
         };
 
         try {
             const response = await axios.post(`${getBaseUrl()}/order`, body);
-            if (response.data?.url) {
-                // পেমেন্ট পেজে যাওয়ার আগে ডাটা ক্লিয়ার করার দরকার নেই, 
-                // কারণ পেমেন্ট ক্যানসেল করে ফিরে আসলে আমরা ডাটা রাখতে চাই।
-                window.location.replace(response.data.url);
-            }
+            if (response.data?.url) window.location.replace(response.data.url);
         } catch (error) {
-            console.error("Order error:", error);
-            toast.error("Order is not proccessing।");
+            toast.error("Order processing failed!");
         }
     };
 
@@ -180,25 +143,27 @@ const Checkout = () => {
     const isFormIncomplete = !formData.firstName || !formData.address || !formData.district || !formData.phone;
 
     return (
-        <div className="max-w-7xl mx-auto px-4 lg:px-28 py-12 font-sans">
+        <motion.div 
+            initial={{ opacity: 0, y: 20 }} 
+            animate={{ opacity: 1, y: 0 }} 
+            className="max-w-7xl mx-auto px-4 lg:px-28 py-12 font-sans"
+        >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-
-                {/* Billing Details */}
+                
+                {/* Billing Details - Left Side */}
                 <div className="space-y-5">
                     <h3 className="text-2xl font-bold border-b pb-3 text-gray-800 uppercase">Billing Details</h3>
                     <div className="grid grid-cols-2 gap-4">
                         <div className="flex flex-col">
                             <label className="text-sm font-semibold mb-1">First Name *</label>
-                            <input placeholder='First Name' type="text" name="firstName" value={formData.firstName} onChange={handleInputChange}
-                                className={`p-2.5 border rounded-md outline-none ${errors.firstName ? 'border-red-500' : 'focus:border-black'}`} />
+                            <input name="firstName" value={formData.firstName} onChange={handleInputChange} className={`p-2.5 border rounded-md outline-none ${errors.firstName ? 'border-red-500' : 'focus:border-black'}`} />
                         </div>
                         <div className="flex flex-col">
                             <label className="text-sm font-semibold mb-1">Last Name</label>
-                            <input placeholder='Last Name' type="text" name="lastName" value={formData.lastName} onChange={handleInputChange}
-                                className="p-2.5 border rounded-md outline-none focus:border-black" />
+                            <input name="lastName" value={formData.lastName} onChange={handleInputChange} className="p-2.5 border rounded-md outline-none focus:border-black" />
                         </div>
                     </div>
-
+                    {/* ... (বাকি ইনপুট ফিল্ডগুলো আগের মতোই থাকবে) */}
                     <div className="flex flex-col">
                         <label className="text-sm font-semibold mb-1">District *</label>
                         <select name="district" value={formData.district} onChange={handleInputChange}
@@ -268,7 +233,7 @@ const Checkout = () => {
                             <option value="Tangail">Tangail</option>
                             <option value="Thakurgaon">Thakurgaon</option>
                         </select>
-                        {errors.district && <span className="text-red-500 text-xs mt-1">{errors.district}</span>}
+                       {errors.district && <span className="text-red-500 text-xs mt-1">{errors.district}</span>}
                     </div>
 
                     <div className="flex flex-col">
@@ -290,70 +255,70 @@ const Checkout = () => {
                     </div>
                 </div>
 
-                {/* Order Review */}
-                <div className="bg-gray-50 p-8 rounded-xl border border-gray-200 shadow-sm h-fit">
+                {/* Order Review - Right Side */}
+                <motion.div 
+                    layout
+                    className="bg-gray-50 p-8 rounded-xl border border-gray-200 shadow-sm h-fit"
+                >
                     <h3 className="text-2xl font-bold mb-6 text-gray-800 uppercase border-b pb-2">Your Order</h3>
-                    <table className="w-full text-sm">
-                        <tbody>
+                    <div className="space-y-4">
+                        <AnimatePresence>
                             {products.map((item) => (
-                                <tr key={item._id} className="border-b">
-                                    <td className="py-4 flex gap-3">
-                                        <img src={item.image} alt="" className="w-16 h-16 object-cover rounded border" />
+                                <motion.div 
+                                    key={`${item._id}-${item.size}`}
+                                    layout
+                                    initial={{ opacity: 0, x: -10 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: 20 }}
+                                    className="flex items-center justify-between border-b pb-4"
+                                >
+                                    <div className="flex gap-3">
+                                        <img src={item.image} className="w-16 h-16 object-cover rounded border" alt="" />
                                         <div className="flex flex-col justify-center">
-                                            <span className="font-medium text-gray-800 mb-1">
+                                            <span className="font-medium text-gray-800 text-sm">
                                                 {item.name} {item.size && `(${item.size})`}
                                             </span>
-                                            <div className="flex items-center border w-fit rounded overflow-hidden">
-                                                <button type="button" onClick={() => dispatch(updateQuantity({ id: item._id, type: 'decrement' }))}
-                                                    className="px-2 py-1 bg-gray-50 hover:bg-gray-200 text-gray-700 font-bold">-</button>
-                                                <span className="px-3 py-1 bg-white text-xs font-bold border-x">{item.quantity}</span>
-                                                <button type="button" onClick={() => dispatch(updateQuantity({ id: item._id, type: 'increment' }))}
-                                                    className="px-2 py-1 bg-gray-50 hover:bg-gray-200 text-gray-700 font-bold">+</button>
+                                            <div className="flex items-center border w-fit rounded mt-1 bg-white">
+                                                {/* ফিক্সড: এখানে id এবং size দুইটাই পাঠানো হয়েছে */}
+                                                <button type="button" onClick={() => handleUpdateQuantity('decrement', item._id, item.size)} className="px-2 py-0.5 hover:bg-gray-100 text-gray-700">-</button>
+                                                <span className="px-3 py-0.5 text-xs font-bold border-x">{item.quantity}</span>
+                                                <button type="button" onClick={() => handleUpdateQuantity('increment', item._id, item.size)} className="px-2 py-0.5 hover:bg-gray-100 text-gray-700">+</button>
                                             </div>
                                         </div>
-                                    </td>
-                                    <td className="text-right font-bold align-middle">
-                                        Tk. {(item.price * item.quantity).toLocaleString('en-IN')}
-                                    </td>
-                                </tr>
+                                    </div>
+                                    <span className="font-bold text-sm">Tk. {(item.price * item.quantity).toLocaleString()}</span>
+                                </motion.div>
                             ))}
-                        </tbody>
-                        <tfoot className="text-gray-700">
-                            <tr className="border-b">
-                                <td className="py-3">Subtotal</td>
-                                <td className="py-3 text-right font-bold">Tk. {totalPrice.toLocaleString()}</td>
-                            </tr>
-                            <tr className="border-b">
-                                <td className="py-3">Shipping</td>
-                                <td className="py-3 text-right font-medium">Tk. {deliveryCharge}</td>
-                            </tr>
-                            {discount > 0 && (
-                                <tr className="border-b text-red-600">
-                                    <td className="py-3 font-medium">Discount</td>
-                                    <td className="py-3 text-right font-bold">- Tk. {discount.toLocaleString()}</td>
-                                </tr>
-                            )}
-                            <tr>
-                                <td className="py-4 text-xl font-bold uppercase">Total</td>
-                                <td className="py-4 text-right text-xl font-extrabold text-black">Tk. {finalTotal.toLocaleString()}</td>
-                            </tr>
-                        </tfoot>
-                    </table>
-
-                    <div className="flex gap-2 my-6 pt-6 border-t">
-                        <input type="text" placeholder="Coupon Code" value={couponCode} onChange={(e) => setCouponCode(e.target.value)}
-                            className="flex-1 p-2 border rounded outline-none text-sm" />
-                        <button type="button" onClick={handleApplyCoupon} className="bg-black text-white px-4 py-2 rounded text-xs font-bold uppercase">Apply</button>
+                        </AnimatePresence>
                     </div>
 
-                    <button type="button" onClick={makePayment} disabled={isFormIncomplete}
-                        className={`w-full py-4 rounded font-bold text-lg uppercase transition-all 
-                            ${isFormIncomplete ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-black text-white hover:bg-gray-800'}`}>
-                        {isFormIncomplete ? 'Fill All Fields' : `Place Order (Tk. ${finalTotal.toLocaleString()})`}
-                    </button>
-                </div>
+                    <div className="mt-6 space-y-2 text-sm text-gray-700">
+                        <div className="flex justify-between"><span>Subtotal</span><span className="font-bold">Tk. {totalPrice.toLocaleString()}</span></div>
+                        <div className="flex justify-between"><span>Shipping</span><span className="font-medium">Tk. {deliveryCharge}</span></div>
+                        {discount > 0 && <div className="flex justify-between text-red-600"><span>Discount</span><span className="font-bold">- Tk. {discount.toLocaleString()}</span></div>}
+                        <div className="flex justify-between border-t pt-4 text-xl font-bold text-black uppercase">
+                            <span>Total</span>
+                            <span>Tk. {finalTotal.toLocaleString()}</span>
+                        </div>
+                    </div>
+
+                    <div className="flex gap-2 my-6 pt-6 border-t">
+                        <input type="text" placeholder="Coupon Code" value={couponCode} onChange={(e) => setCouponCode(e.target.value)} className="flex-1 p-2 border rounded outline-none text-sm" />
+                        <button type="button" onClick={handleApplyCoupon} className="bg-black text-white px-4 py-2 rounded text-xs font-bold uppercase hover:bg-gray-800">Apply</button>
+                    </div>
+
+                    <motion.button 
+                        whileHover={{ scale: isFormIncomplete ? 1 : 1.01 }}
+                        whileTap={{ scale: isFormIncomplete ? 1 : 0.98 }}
+                        onClick={makePayment} 
+                        disabled={isFormIncomplete}
+                        className={`w-full py-4 rounded font-bold text-lg uppercase transition-all ${isFormIncomplete ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-black text-white hover:shadow-lg'}`}
+                    >
+                        {isFormIncomplete ? 'Fill Required Fields' : `Place Order`}
+                    </motion.button>
+                </motion.div>
             </div>
-        </div>
+        </motion.div>
     );
 };
 

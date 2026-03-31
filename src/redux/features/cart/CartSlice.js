@@ -7,9 +7,9 @@ const initialState = {
     totalPrice: 0
 }
 
-const calculateCartTotals = (products)=> {
+const calculateCartTotals = (products) => {
     const selectedItems = products.reduce((total, product) => total + product.quantity, 0);
-    const totalPrice = products.reduce((total, product)=> total + product.quantity * product.price, 0);
+    const totalPrice = products.reduce((total, product) => total + product.quantity * product.price, 0);
     return { selectedItems, totalPrice }
 }
 
@@ -17,99 +17,79 @@ export const cartSlice = createSlice({
     name: 'cart',
     initialState,
     reducers: {
-        // addToCart: (state, action) => {
-        //     const isExist = state.products.find(product => product._id === action.payload._id);
-            
-        //     if (!isExist) {
-        //         // Jodi product-ta cart-e na thake, tobe add koro
-        //         // Shather 'quantity' initialize kore deya bhalo
-        //         state.products.push({ ...action.payload, quantity: 1 });
-        //         Swal.fire({
-        //         title: 'Added!',
-        //         text: 'Product added to cart',
-        //         icon: 'success',
-        //         confirmButtonText: "it's ok"
-        //         })
-        //     } else {
-        //         // Jodi thake, tahole quantity bariye dao
-        //         // isExist.quantity += 1;
-        //         Swal.fire({
-        //         title: 'Already Added',
-        //         text: 'Product already in cart',
-        //         icon: 'error',
-        //         confirmButtonText: "it's ok"
-        //         })
-        //     }
-
-        //     // Global totals update koro
-        //    const totals = calculateCartTotals(state.products)
-        //     state.selectedItems = totals.selectedItems;
-        //     state.totalPrice = totals.totalPrice;
-        // }
-
         addToCart: (state, action) => {
-    // 1. Check koro ID ebong Size duitai mile kina
-    const isExist = state.products.find(
-        product => product._id === action.payload._id && product.size === action.payload.size
-    );
-    
-    if (!isExist) {
-        // Jodi product + size combination-ta na thake, tobe add koro
-        // action.payload-er bhetore 'size' field-ta thakte hobe (Front-end theke pathate hobe)
-        state.products.push({ ...action.payload, quantity: 1 });
-        
-        Swal.fire({
-            title: 'Added!',
-            text: `Product (${action.payload.size}) added to cart`,
-            icon: 'success',
-            confirmButtonText: "it's ok"
-        });
-    } else {
-        // Jodi thake, tahole quantity bariye dao (optional)
-        isExist.quantity += 1; 
-        
-        Swal.fire({
-            title: 'Updated',
-            text: 'Product quantity increased in cart',
-            icon: 'info',
-            confirmButtonText: "it's ok"
-        });
-    }
+            // ID এবং Size—দুইটাই চেক করা হচ্ছে
+            const isExist = state.products.find(
+                product => product._id === action.payload._id && product.size === action.payload.size
+            );
 
-    // Global totals update koro
-    const totals = calculateCartTotals(state.products);
-    state.selectedItems = totals.selectedItems;
-    state.totalPrice = totals.totalPrice;
-}
-        ,
+            if (!isExist) {
+                // নতুন আইটেম হিসেবে পুশ হবে
+                state.products.push({ ...action.payload, quantity: 1 });
+                
+                Swal.fire({
+                    title: 'Added!',
+                    text: `Product (${action.payload.size}) added to cart`,
+                    icon: 'success',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+            } else {
+                // একই ID এবং Size হলে শুধু কোয়ান্টিটি বাড়বে
+                isExist.quantity += 1;
+                
+                Swal.fire({
+                    title: 'Updated',
+                    text: `Quantity increased for size ${action.payload.size}`,
+                    icon: 'info',
+                    timer: 1000,
+                    showConfirmButton: false
+                });
+            }
+
+            const totals = calculateCartTotals(state.products);
+            state.selectedItems = totals.selectedItems;
+            state.totalPrice = totals.totalPrice;
+        },
+
+        updateQuantity: (state, action) => {
+            const { type, id, size } = action.payload; // Payload থেকে size নেওয়া হচ্ছে
+            
+            // ID এবং Size মিলিয়ে নির্দিষ্ট প্রোডাক্টটি খোঁজা হচ্ছে
+            const product = state.products.find(
+                (item) => item._id === id && item.size === size
+            );
+
+            if (product) {
+                if (type === "increment" && product.quantity < 10) {
+                    product.quantity += 1;
+                } else if (type === "decrement" && product.quantity > 1) {
+                    product.quantity -= 1;
+                }
+            }
+
+            const totals = calculateCartTotals(state.products);
+            state.selectedItems = totals.selectedItems;
+            state.totalPrice = totals.totalPrice;
+        },
+
+        removeFromCart: (state, action) => {
+            const { id, size } = action.payload; // Payload থেকে size নেওয়া হচ্ছে
+            
+            // ID এবং Size এর বাইরে বাকিগুলো রেখে ফিল্টার করা হচ্ছে
+            state.products = state.products.filter(
+                product => !(product._id === id && product.size === size)
+            );
+
+            const totals = calculateCartTotals(state.products);
+            state.selectedItems = totals.selectedItems;
+            state.totalPrice = totals.totalPrice;
+        },
+
         clearCart: (state) => {
             state.products = [];
             state.selectedItems = 0;
             state.totalPrice = 0;
-        },
-        updateQuantity: (state, action)=> {
-            const product = state.products.find((item)=> item._id === action.payload.id);
-            
-            if (product) {
-                if(action.payload.type === "increment" && product.quantity < 10){
-                    product.quantity += 1;
-                }else if(action.payload.type === "decrement" && product.quantity > 1){
-                    product.quantity -=1;
-                }
-            }
-            const totals = calculateCartTotals(state.products)
-            state.selectedItems = totals.selectedItems;
-            state.totalPrice = totals.totalPrice;
-        },
-        removeFromCart: (state, action)=> {
-            state.products = state.products.filter(product => product._id !== action.payload.id);
-            const totals = calculateCartTotals(state.products)
-            state.selectedItems = totals.selectedItems;
-            state.totalPrice = totals.totalPrice;
-        },
-        clearCart: (state) => {
-            // কোলন (:) এর বদলে ডট (.) হবে
-            Object.assign(state, initialState);
         }
     }
 })

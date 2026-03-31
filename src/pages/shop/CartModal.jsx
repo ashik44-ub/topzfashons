@@ -15,18 +15,18 @@ const CartModal = () => {
     // মডাল ওপেন হলে পেছনের পেজের স্ক্রল বন্ধ করার জন্য
     useEffect(() => {
         document.body.style.overflow = 'hidden';
-        // ক্লিনআপ ফাংশন: মডাল বন্ধ হলে স্ক্রল আবার চালু হবে
         return () => {
             document.body.style.overflow = 'auto';
         };
     }, []);
 
     const handleClose = () => {
-        navigate(-1); // ইউজারকে আগের পেজে ফেরত পাঠাবে
+        navigate(-1);
     };
 
-    const handleUpdateQuantity = (type, id) => {
-        dispatch(updateQuantity({ type, id }));
+    // এখানে ৩টি প্যারামিটার লাগবে: type, id, এবং size
+    const handleUpdateQuantity = (type, id, size) => {
+        dispatch(updateQuantity({ type, id, size }));
     };
 
     const modalContent = (
@@ -56,7 +56,8 @@ const CartModal = () => {
                     <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
                         {products && products.length > 0 ? (
                             products.map((product, index) => (
-                                <div key={product._id || index} className="flex gap-4 border-b py-4 items-center">
+                                // key হিসেবে ID এবং Size এর কম্বিনেশন ব্যবহার করা হয়েছে
+                                <div key={`${product._id}-${product.size}`} className="flex gap-4 border-b py-4 items-center">
                                     <img 
                                         src={product?.image} 
                                         className="w-16 h-16 object-cover rounded-lg border" 
@@ -71,20 +72,24 @@ const CartModal = () => {
                                             {/* Quantity Control */}
                                             <div className="flex items-center border rounded-md bg-gray-50">
                                                 <button 
-                                                    onClick={() => handleUpdateQuantity('decrement', product._id)}
+                                                    onClick={() => handleUpdateQuantity('decrement', product._id, product.size)}
                                                     className="px-2 py-0.5 hover:bg-gray-200"
                                                 >-</button>
                                                 <span className="px-2 text-xs font-bold">{product.quantity}</span>
                                                 <button 
-                                                    onClick={() => handleUpdateQuantity('increment', product._id)}
+                                                    onClick={() => handleUpdateQuantity('increment', product._id, product.size)}
                                                     className="px-2 py-0.5 hover:bg-gray-200"
                                                 >+</button>
                                             </div>
-                                            <div className="flex items-center border rounded-md bg-gray-50">
-                                                <span className='px-3'>{product?.size}</span>
+
+                                            {/* Size Badge */}
+                                            <div className="flex items-center border rounded-md bg-gray-100 px-3 py-0.5">
+                                                <span className='text-[10px] font-bold uppercase'>{product?.size}</span>
                                             </div>
+
+                                            {/* Remove Button */}
                                             <button 
-                                                onClick={() => dispatch(removeFromCart({ id: product._id }))}
+                                                onClick={() => dispatch(removeFromCart({ id: product._id, size: product.size }))}
                                                 className="text-red-500 text-xs hover:underline"
                                             >
                                                 Remove
@@ -112,7 +117,6 @@ const CartModal = () => {
         </div>
     );
 
-    // এটি public/index.html-এর 'cart-portal' ডিভে রেন্ডার হবে
     return createPortal(
         modalContent,
         document.getElementById('cart-portal')

@@ -29,6 +29,19 @@ const sizes = [
     { label: 'XS', value: 'xs' }
 ];
 
+const brands = [
+    { label: 'Topz Fashions', value: 'topz-fashions' },
+    { label: 'Urban Aura', value: 'urban-aura' },
+    { label: 'Modest Mist', value: 'modest-mist' },
+    { label: 'Velvet Vogue', value: 'velvet-vogue' },
+    { label: 'Zenith Apparel', value: 'zenith-apparel' },
+    { label: 'Silk & Saffron', value: 'silk-saffron' },
+    { label: 'Nordic Neat', value: 'nordic-neat' },
+    { label: 'Indigo Edge', value: 'indigo-edge' },
+    { label: 'Petal Soft', value: 'petal-soft' },
+    { label: 'Heritage Hue', value: 'heritage-hue' },
+];
+
 const genders = [
     { label: 'Man', value: 'man' }, { label: 'Woman', value: 'woman' }
 ];
@@ -144,6 +157,13 @@ const UpdateProduct = () => {
                                 <select name="gender" value={product.gender} onChange={handleChange} className={inputStyle}>
                                     <option value="">Select Gender</option>
                                     {genders.map(g => <option key={g.value} value={g.value}>{g.label}</option>)}
+                                </select>
+                            </div>
+                            <div>
+                                <label className="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-200">Brand</label>
+                                <select name="brand" value={product.brand} onChange={handleChange} className={inputStyle} required>
+                                    <option value="">Select Brand</option>
+                                    {brands.map(b => <option key={b.value} value={b.value}>{b.label}</option>)}
                                 </select>
                             </div>
                             <div>
