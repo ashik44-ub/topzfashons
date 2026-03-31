@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 import { useLoginUserMutation } from '../redux/features/auth/authApi';
@@ -28,30 +29,22 @@ const LoginPage = () => {
     try {
       setMessage(''); 
       const response = await loginUser(data).unwrap();
-      
-      // *** আপডেট: response থেকে user এবং token আলাদা করা ***
-      // আপনার ব্যাকএন্ড যদি { user, token } পাঠায় তবে এটি কাজ করবে
       const { user, token } = response;
 
-      // ১. টোকেনটি LocalStorage-এ সেভ করা (যাতে authApi এটি ব্যবহার করতে পারে)
       if (token) {
         localStorage.setItem('token', token);
       }
 
-      // ২. Remember Me লজিক
       if (rememberMe) {
         localStorage.setItem("rememberedEmail", data.email);
       } else {
         localStorage.removeItem("rememberedEmail");
       }
       
-      // ৩. রেডক্স স্টেট আপডেট
       dispatch(setUser({ user }));
-      
       toast.success("Login successful!");
       navigate('/');
     } catch (error) {
-      console.error("Login Error:", error);
       const errorMsg = error.data?.message || "Invalid email or password.";
       setMessage(errorMsg);
       toast.error(errorMsg);
@@ -60,27 +53,46 @@ const LoginPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8 bg-white p-10 shadow-xl rounded-xl">
-        
+      {/* Container Animation */}
+      <motion.div 
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+        className="max-w-md w-full space-y-8 bg-white p-10 shadow-xl rounded-xl"
+      >
         <div className="text-center">
-          <h2 className="text-3xl font-extrabold text-gray-900 uppercase tracking-tighter">
+          <motion.h2 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+            className="text-3xl font-extrabold text-gray-900 uppercase tracking-tighter"
+          >
             Welcome Back
-          </h2>
+          </motion.h2>
           <p className="mt-2 text-sm text-gray-500 font-medium">
             Please enter your details to login
           </p>
         </div>
 
-        {message && (
-          <div className="mt-6 p-3 bg-red-50 border-l-4 border-red-500 text-red-700 text-xs font-bold uppercase tracking-widest flex items-center animate-pulse">
-            <i className="ri-error-warning-line mr-2 text-lg"></i>
-            {message}
-          </div>
-        )}
+        {/* Error Message Animation */}
+        <AnimatePresence>
+          {message && (
+            <motion.div 
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="mt-6 p-3 bg-red-50 border-l-4 border-red-500 text-red-700 text-xs font-bold uppercase tracking-widest flex items-center overflow-hidden"
+            >
+              <i className="ri-error-warning-line mr-2 text-lg"></i>
+              {message}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
           <div className="space-y-4">
-            <div>
+            {/* Email Field */}
+            <motion.div whileFocus={{ scale: 1.01 }} transition={{ duration: 0.2 }}>
               <label className="text-xs font-bold uppercase tracking-widest text-gray-700 ml-1">
                 Email Address
               </label>
@@ -94,11 +106,16 @@ const LoginPage = () => {
                   className={`block w-full pl-10 pr-3 py-3 border ${errors.email ? 'border-red-500' : 'border-gray-200'} rounded-lg focus:ring-red-500 focus:border-red-500 outline-none text-sm transition-all`}
                   placeholder="name@example.com"
                 />
-                {errors.email && <p className='text-red-500 text-[10px] mt-1 font-bold uppercase ml-1'>{errors.email.message}</p>}
               </div>
-            </div>
+              {errors.email && (
+                <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className='text-red-500 text-[10px] mt-1 font-bold uppercase ml-1'>
+                  {errors.email.message}
+                </motion.p>
+              )}
+            </motion.div>
 
-            <div>
+            {/* Password Field */}
+            <motion.div whileFocus={{ scale: 1.01 }} transition={{ duration: 0.2 }}>
               <label className="text-xs font-bold uppercase tracking-widest text-gray-700 ml-1">
                 Password
               </label>
@@ -112,9 +129,13 @@ const LoginPage = () => {
                   className={`block w-full pl-10 pr-3 py-3 border ${errors.password ? 'border-red-500' : 'border-gray-200'} rounded-lg focus:ring-red-500 focus:border-red-500 outline-none text-sm transition-all`}
                   placeholder="••••••••"
                 />
-                {errors.password && <p className='text-red-500 text-[10px] mt-1 font-bold uppercase ml-1'>{errors.password.message}</p>}
               </div>
-            </div>
+              {errors.password && (
+                <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className='text-red-500 text-[10px] mt-1 font-bold uppercase ml-1'>
+                  {errors.password.message}
+                </motion.p>
+              )}
+            </motion.div>
           </div>
 
           <div className="flex items-center justify-between">
@@ -131,21 +152,24 @@ const LoginPage = () => {
               </label>
             </div>
             <div className="text-xs font-bold uppercase tracking-tighter">
-              <Link to={'/forget-password'} className="text-red-500 hover:text-red-600">
+              <Link to={'/forget-password'} className="text-red-500 hover:text-red-600 transition-colors">
                 Forgot password?
               </Link>
             </div>
           </div>
 
-          <div>
+          <motion.div
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
             <button
               disabled={isLoading}
               type="submit"
-              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-bold uppercase tracking-widest rounded-lg text-white bg-gray-900 hover:bg-black focus:outline-none transition-all duration-300 shadow-lg active:scale-95 disabled:bg-gray-400 disabled:cursor-not-allowed"
+              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-bold uppercase tracking-widest rounded-lg text-white bg-gray-900 hover:bg-black focus:outline-none transition-all duration-300 shadow-lg disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
               {isLoading ? <BeatLoader size={8} color="#ffffff" /> : "Login"}
             </button>
-          </div>
+          </motion.div>
         </form>
 
         <p className="mt-8 text-center text-sm text-gray-500">
@@ -154,7 +178,7 @@ const LoginPage = () => {
             Register Now
           </Link>
         </p>
-      </div>
+      </motion.div>
     </div>
   );
 };

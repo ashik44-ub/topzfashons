@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 
 const Features = () => {
   const featureList = [
@@ -28,19 +29,51 @@ const Features = () => {
     }
   ];
 
+  // Animation Variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.15, // Protiti item 0.15s por por ashbe
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, x: -20 },
+    visible: { 
+      opacity: 1, 
+      x: 0,
+      transition: { duration: 0.5, ease: "easeOut" }
+    }
+  };
+
   return (
-    <section className="py-20 bg-white">
+    <section className="py-20 bg-white overflow-hidden">
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
+        <motion.div 
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10"
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.2 }} // 20% visible holei start hobe
+        >
           {featureList.map((feature, index) => (
-            <div 
+            <motion.div 
               key={index} 
-              className="flex items-center space-x-5 lg:justify-center group"
+              variants={itemVariants}
+              whileHover={{ scale: 1.05 }} // Hover korle ektu boro hobe
+              className="flex items-center space-x-5 lg:justify-center group cursor-default"
             >
-              {/* Icon Container */}
-              <div className={`text-4xl ${feature.color} transition-transform duration-300 group-hover:-translate-y-2`}>
+              {/* Icon Container with Hover Animation */}
+              <motion.div 
+                className={`text-4xl ${feature.color}`}
+                whileHover={{ rotate: [0, -10, 10, 0] }} // Icon-ti halka shake hobe
+                transition={{ duration: 0.3 }}
+              >
                 <i className={feature.icon}></i>
-              </div>
+              </motion.div>
 
               {/* Text Content */}
               <div>
@@ -51,9 +84,9 @@ const Features = () => {
                   {feature.desc}
                 </p>
               </div>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   );
