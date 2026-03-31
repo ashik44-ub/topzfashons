@@ -51,24 +51,23 @@ const UpdateProduct = () => {
     const navigate = useNavigate();
     const { user } = useSelector(state => state.auth);
 
-    // ১. প্রোডাক্ট ডাটা ফেচ করা
     const { data, isLoading: isProductLoading, refetch } = useFetchProductByidQuery(id);
     const [updateProductMutation, { isLoading: isUpdating }] = useUpdateProductMutation();
 
     const [product, setProduct] = useState({
-        name: '', category: '', description: '', price: '',
+        name: '', category: '', brand: '', description: '', price: '',
         oldprice: '', color: '', size: [], sku: '', gender: '', quantity: ''
     });
 
     const [image, setImage] = useState("");
 
-    // ২. ডাটা আসলে স্টেটে সেট করা
     useEffect(() => {
         const fetchedProduct = data?.data?.product || data?.product;
         if (fetchedProduct) {
             setProduct({
                 name: fetchedProduct.name || '',
                 category: fetchedProduct.category || '',
+                brand: fetchedProduct.brand || '', // ব্র্যান্ড লোড করা হচ্ছে
                 description: fetchedProduct.description || '',
                 price: fetchedProduct.price || '',
                 oldprice: fetchedProduct.oldprice || '',
@@ -100,20 +99,22 @@ const UpdateProduct = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         
-        // এখানে ভেরিয়েবল নাম পরিবর্তন করা হয়েছে যাতে মিউটেশন ফাংশনের সাথে কনফ্লিক্ট না হয়
+        // ডেসক্রিপশন থেকে অপ্রয়োজনীয় স্পেস এবং ক্যারেক্টার ক্লিন করা
+        const cleanDescription = product.description.replace(/&nbsp;/g, ' ').trim();
+
         const updatedProductBody = {
             ...product,
+            brand: product.brand, // ব্র্যান্ড নিশ্চিত করা হচ্ছে
+            description: cleanDescription, // ক্লিনড ডেসক্রিপশন
             image: image || data?.data?.product?.image, 
             author: user?._id,
             price: Number(product.price),
-            oldprice: Number(product.oldprice),
-            quantity: Number(product.quantity)
+            oldprice: Number(product.oldprice || 0),
+            quantity: Number(product.quantity || 1)
         };
 
         try {
-            // মিউটেশন কল
             await updateProductMutation({ id: id, ...updatedProductBody }).unwrap();
-            
             toast.success("Product Updated Successfully!");
             refetch();
             navigate("/dashboard/manage-products");
@@ -159,6 +160,7 @@ const UpdateProduct = () => {
                                     {genders.map(g => <option key={g.value} value={g.value}>{g.label}</option>)}
                                 </select>
                             </div>
+                            {/* ব্র্যান্ড আপডেট ফিল্ড */}
                             <div>
                                 <label className="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-200">Brand</label>
                                 <select name="brand" value={product.brand} onChange={handleChange} className={inputStyle} required>
@@ -173,6 +175,7 @@ const UpdateProduct = () => {
                                     {categories.map(cat => <option key={cat.value} value={cat.value}>{cat.label}</option>)}
                                 </select>
                             </div>
+                            {/* বাকি ইনপুটগুলো আগের মতোই থাকবে... */}
                             <div>
                                 <label className="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-200">Color</label>
                                 <select name="color" value={product.color} onChange={handleChange} className={inputStyle}>
